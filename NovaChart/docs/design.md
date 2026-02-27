@@ -181,7 +181,19 @@ NovaChart/
 
 - **Vitest** + **@testing-library/react** + **jsdom**。
 - 設定: `vitest.config.ts`, `vitest.setup.ts`。
-- テスト: `__tests__/` に `storage`, `leagueEntry`, `useChartData`, `useYAxisConfig`, `prediction`, `errorHandler`, `dateUtils`, `riotClient`, `ChartContainer` 等。
+- 実行: `npm test`（watch）/ `npm test -- --run`（1回のみ）。
+- **テスト一覧**（`__tests__/`）:
+  - `storage.test.ts` — StorageService（APIキー・リージョン・Riot ID・マイグレーション）
+  - `leagueEntry.test.ts` — extractLeagueEntry（抽出・デフォルト・leagueId・null 時 throw）
+  - `errorHandler.test.ts` — handleRiotApiError, extractStatusCodeFromError, isRiotApiError
+  - `dateUtils.test.ts` — 日付フォーマット・getDateKey・isSameDay・start/end of day
+  - `prediction.test.ts` — 線形回帰・到達予測・移動平均・予測ポイント
+  - `progress.test.ts` — calculateProgress, calculateRequiredMatches, calculateStatistics（ソロキュー制約含む）
+  - `matchRating.test.ts` — rateMatch, getRatingColor, getRatingBgColor
+  - `riotClient.test.ts` — tierRankToLP, lpToTierRank（往復変換）
+  - `useChartData.test.ts` — チャートデータ・目標・時間範囲（モック利用）
+  - `useYAxisConfig.test.ts` — Y軸ドメイン・brush・yAxisZoom
+  - `ChartContainer.test.tsx` — BaseChartContainer のスモーク（props 受け取り）
 
 ---
 
