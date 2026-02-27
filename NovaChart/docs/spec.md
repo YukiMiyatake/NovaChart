@@ -36,13 +36,16 @@ LoL（League of Legends）のレート推移を可視化・分析するWebアプ
 
 - **現在のランク表示**
   - ティア・ランク・LP・勝敗（ソロキューのみ）
+  - 取得元: **League Entry API**（`/api/riot/league-by-puuid`）の1時点データ
 - **レート更新（Update）**
   - サマナー情報の更新
   - ソロキュー League Entry の取得・保存
   - レート履歴の取得（最大100試合分）・保存
   - 試合詳細の取得（最大20試合）・保存
-- **レート履歴**
-  - 試合ごとの日付・ティア・ランク・LP・勝敗を時系列で保存
+- **レート履歴（LP変動の時系列）**
+  - **取得元は League Entry 単体ではない**。**マッチ履歴 API + 現在の League Entry** から復元している。
+  - 現在の League Entry を起点に、マッチ履歴を遡り、勝敗に応じた平均LP変動で各試合時点のLPを逆算して `rateHistory` を生成（`/api/riot/fetch-rate-history`）。
+  - 試合ごとの日付・ティア・ランク・LP・勝敗を時系列で保存（IndexedDB の `rateHistory`）。
   - 当日・未来日付のエントリは保存しない（APIの「現在値」用は除外）
   - `matchId` が `current-` で始まるエントリは保存しない
 
@@ -93,6 +96,11 @@ LoL（League of Legends）のレート推移を可視化・分析するWebアプ
   - データベース名: `NovaChartDB_v6`
 - **マイグレーション**
   - 旧DB（NovaChartDB, v2〜v5）から v6 への初回マイグレーションを実行（旧DBは削除しない）
+- **API 取得結果によるレコード削除方針（履歴は永続）**
+  - **League Entry も Rate history も、API の結果如何で削除しない**。過去のランク変動グラフを永続的に表示できるようにする。
+  - **League Entry**: 「ランクなし」（API が 200 で `entry` が無い）や「ソロ以外のキューが返った」場合でも、DB の `leagueEntries` は削除しない。表示だけ「現在ランクなし」にする（`setCurrentLeagueEntry(null)`）。API 失敗時も同様に削除しない。
+  - **Rate history / Match**: 更新処理では既存データの削除は行わず、取得できた新規分のみ追加（同一 `matchId` は更新）。API 失敗時も何も削除しない。
+  - **現在のランク表示**: API から取得できない、またはランクが無い場合は「ランクなし」表示でよい。DB に過去の league entry が残っていれば、再表示時には DB から読み直して表示可能。
 - **エクスポート/インポート**
   - `lib/db/exportImport.ts` で一括エクスポート・インポートが可能（UI要確認）
 

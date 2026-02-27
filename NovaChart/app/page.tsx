@@ -84,14 +84,12 @@ export default function Home() {
                       logger.info('[Home] Fetched and saved solo queue league entry on startup');
                     } else {
                       logger.warn('[Home] Received non-solo queue entry on startup, ignoring:', entry.queueType);
-                      // Clear any non-solo queue entry
+                      // Display: rank none. Do NOT delete from DB - keep history for past rank graph.
                       setCurrentLeagueEntry(null);
-                      await leagueEntryService.delete(latestSummoner.puuid);
                     }
                   } else {
-                    // No league entry found - clear it
+                    // No league entry found - display as rank none. Do NOT delete from DB - keep history.
                     setCurrentLeagueEntry(null);
-                    await leagueEntryService.delete(latestSummoner.puuid);
                   }
                 } else {
                   logger.warn('[Home] Failed to fetch league entry on startup');
@@ -214,24 +212,12 @@ export default function Home() {
               }
             } else {
               logger.warn('[Update] Received non-solo queue entry, ignoring:', entry.queueType);
-              // DO NOT set the entry - reject it
-              // Also clear any existing non-solo queue entry from database
-              try {
-                const { leagueEntryService } = await import('@/lib/db');
-                await leagueEntryService.delete(currentSummoner.puuid);
-              } catch (dbError) {
-                logger.error('[Update] Failed to delete non-solo queue entry from database:', dbError);
-              }
+              // Display: rank none. Do NOT delete from DB - keep history for past rank graph.
+              setCurrentLeagueEntry(null);
             }
           } else {
-            // No entry found - clear from database
-            try {
-              const { leagueEntryService } = await import('@/lib/db');
-              await leagueEntryService.delete(currentSummoner.puuid);
-              setCurrentLeagueEntry(null);
-            } catch (dbError) {
-              logger.error('[Update] Failed to delete league entry from database:', dbError);
-            }
+            // No entry found - display as rank none. Do NOT delete from DB - keep history.
+            setCurrentLeagueEntry(null);
           }
         }
       } catch (error) {

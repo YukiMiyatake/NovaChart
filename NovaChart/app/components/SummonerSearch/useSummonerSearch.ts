@@ -419,24 +419,12 @@ export function useSummonerSearch(
                 }
               } else {
                 logger.warn('[SummonerSearch] Received non-solo queue entry, ignoring:', entry.queueType);
-                // DO NOT set the entry - reject it
-                // Also clear any existing non-solo queue entry from database
-                try {
-                  const { leagueEntryService } = await import('@/lib/db');
-                  await leagueEntryService.delete(summoner.puuid);
-                } catch (dbError) {
-                  logger.error('[SummonerSearch] Failed to delete non-solo queue entry from database:', dbError);
-                }
+                // Display: rank none. Do NOT delete from DB - keep history for past rank graph.
+                setCurrentLeagueEntry(null);
               }
             } else {
-              // No entry found - clear from database
-              try {
-                const { leagueEntryService } = await import('@/lib/db');
-                await leagueEntryService.delete(summoner.puuid);
-                setCurrentLeagueEntry(null);
-              } catch (dbError) {
-                logger.error('[SummonerSearch] Failed to delete league entry from database:', dbError);
-              }
+              // No entry found - display as rank none. Do NOT delete from DB - keep history.
+              setCurrentLeagueEntry(null);
             }
           }
         } catch (error) {
